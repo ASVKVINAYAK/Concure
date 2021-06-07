@@ -208,7 +208,7 @@ class _SettingPage extends State<SettingPage> {
                 height: 10,
               ),
               clickbutton('Demo',()
-                 {model.shownotification();} ),
+                 {} ),
               ],
             ),
           )

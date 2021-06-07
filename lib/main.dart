@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:covid19_tracker/model/CenterList.dart';
 import 'package:covid19_tracker/services/networking.dart';
 import 'package:http/http.dart' as http;
 import 'package:covid19_tracker/model/config.dart';
@@ -16,10 +17,12 @@ import 'package:workmanager/workmanager.dart';
 void callbackDispatcher()
 {
   Workmanager.executeTask((taskName, inputData) async {
-    Networking n = new Networking();
     NotificationService nr= new NotificationService();
-    n.get_notified();
-    checkAvailability2();
+    GetStorage box = GetStorage();
+    nr.show(box.read('pincode'), "demo bg  fetch");
+    nr.notify_alert();
+    // n.get_notified();
+    //checkAvailability2();
     return Future.value(true);
   });
 }
@@ -43,39 +46,92 @@ class MyApp extends StatefulWidget {
   _MyApp createState() => _MyApp();
 }
 
-Future<bool> checkAvailability2() async {
-  GetStorage box = GetStorage();
-  bool isAvailable = false;
-  print("check2");
-  var currentDistrictId = box.read('district_Id');
-  if (currentDistrictId != null) {
-    String dateString = DateFormat("dd-MM-yyyy").format(DateTime.now());
-    final _url =
-        'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=$currentDistrictId&date=$dateString';
-    // print(_url);
-    var response = await http.get(_url);
-    // print("res ${response.body}");
-    if (response.statusCode == 200) {
-      var r = covidvaccinebypinFromJson(response.body);
-      List<Centers> s = r.centers;
-      List<Session> ct;
-      bool av=false;
-      NotificationService nr= new NotificationService();
-      for(int i=0;i<s.length;++i)
-        {
-          print("vinayak");
-           ct=s[i].sessions;
-           for(int j=0;j<ct.length;++j)
-             {
-               print("${ct[j].minAgeLimit}");
-               nr.ifAvailable(s[i],ct[j]);
-             }
-        }
+// Future<void> checkAvailability() async {
+//   GetStorage box = GetStorage();
+//   var currentDistrictId = box.read('district_Id');
+//   if (currentDistrictId != null) {
+//     DateTime currentdate = DateTime.now();
+//     for (var i = 0; i < 14; i++) {
+//       DateTime date = currentdate.add(Duration(days: i));
+//       String dateString = '${date.day}-${date.month}-${date.year}';
+//       final _url =
+//       // 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=453&date=20-05-2021';
+//           'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=$currentDistrictId&date=$dateString';
+//       // print(_url);
+//       var centerList = await http
+//           .get(Uri.parse(_url))
+//           .then((value) => CenterList.fromJson(value.body));
+//       bool isAvailable = false;
+//       for (var e in centerList.centers) {
+//         // print('Center: ${e.name}');
+//         var avail = e.sessions
+//             .map((el) => el.minAgeLimit > 0)
+//             .toList()
+//             .toSet()
+//             .toList();
+//         if (avail.contains(true)) ifAvailable(e);
+//         if (avail.contains(true)) isAvailable = true;
+//       }
+//       if (isAvailable) break;
+//     }
+//     print('bg-fetch complete............................................');
+//   }
+// }
+// void ifAvailable(CenterDetails e) {
+//   print('Vaccine Available in your district Go Book soon! on Date: ${e.name}');
+//   NotificationService n= new NotificationService();
+//   List<SessionDetails> sessions = e.sessions
+//       .map((e) => e.minAgeLimit > 0 ? e : null)
+//       .toList()
+//     ..removeWhere((el) => el == null);
+//   String p="";
+//   String d="";
+//   for (var session in sessions)
+//     {
+//        p="";
+//        d="";
+//        p+="${e.pincode}";
+//        d=d+"${session.availableCapacity}";
+//        n.show(p,d);
+//     }
+//
+// }
 
-    }
-  }
-  return isAvailable;
-}
+// Future<bool> checkAvailability2() async {
+//   GetStorage box = GetStorage();
+//   Networking n=new Networking();
+//   n.get_notified();
+//   bool isAvailable = false;
+//   print("check2");
+//   var currentDistrictId = box.read('district_id');
+//   if (currentDistrictId != null) {
+//     String dateString = DateFormat("dd-MM-yyyy").format(DateTime.now());
+//     final _url =
+//         'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=$currentDistrictId&date=$dateString';
+//     // print(_url);
+//     var response = await http.get(_url);
+//     // print("res ${response.body}");
+//     if (response.statusCode == 200) {
+//       var r = covidvaccinebypinFromJson(response.body);
+//       List<Centers> s = r.centers;
+//       List<Session> ct;
+//       bool av=false;
+//       NotificationService nr= new NotificationService();
+//       for(int i=0;i<s.length;++i)
+//         {
+//           print("vinayak");
+//            ct=s[i].sessions;
+//            for(int j=0;j<ct.length;++j)
+//              {
+//                print("${ct[j].minAgeLimit}");
+//                nr.ifAvailable(s[i],ct[j]);
+//              }
+//         }
+//
+//     }
+//   }
+//   return isAvailable;
+// }
 
 class _MyApp extends State<MyApp> {
  // Timer _timerForInter;
@@ -150,25 +206,26 @@ class NotificationService extends ChangeNotifier{
     var platform = new NotificationDetails(android:android,iOS:ios);
     await _flutterLocalNotificationsPlugin.show(0, "Vaccine Available at ${center.pincode}", "Totat Vaccine availabe ${sesion.availableCapacity} \n Book now for ${sesion.minAgeLimit} \n On ${sesion.date}", platform);
   }
-  Future shownotification() async {
-    var interval = RepeatInterval.everyMinute;
-    var android = AndroidNotificationDetails("1687497218170948721x8", "New Trips Notification", "Notification Channel for vendor. All the new trips notifications will arrive here.",importance: Importance.max,priority: Priority.high,
-      showWhen: false);
-
-    var ios = IOSNotificationDetails();
-
-    var platform = new NotificationDetails(android:android,iOS:ios);
-
-    await _flutterLocalNotificationsPlugin.periodicallyShow(
-        5,"xya","abc",interval ,platform,
-        payload: "Welcome to demo app");
-    // await _flutterLocalNotificationsPlugin.periodicallyShow(
-    //     5,"xyz","abc",show(),interval ,platform,
-    //     payload: "Welcome to demo app");
-  }
+  // Future shownotification() async {
+  //   var interval = RepeatInterval.everyMinute;
+  //   var android = AndroidNotificationDetails("1687497218170948721x8", "New Trips Notification", "Notification Channel for vendor. All the new trips notifications will arrive here.",importance: Importance.max,priority: Priority.high,
+  //     showWhen: false);
+  //
+  //   var ios = IOSNotificationDetails();
+  //
+  //   var platform = new NotificationDetails(android:android,iOS:ios);
+  //
+  //   await _flutterLocalNotificationsPlugin.periodicallyShow(
+  //       5,"xya","abc",interval ,platform,
+  //       payload: "Welcome to demo app");
+  //   // await _flutterLocalNotificationsPlugin.periodicallyShow(
+  //   //     5,"xyz","abc",show(),interval ,platform,
+  //   //     payload: "Welcome to demo app");
+  // }
   Future onSelectNotification(String payload) {
 
   }
+
   Future<void> show(String pincode,String details)
   async {
     var android = AndroidNotificationDetails("1687497218170948721x8", "New Trips Notification", "Notification Channel for vendor. All the new trips notifications will arrive here.",importance: Importance.max,priority: Priority.high,
@@ -178,10 +235,83 @@ class NotificationService extends ChangeNotifier{
 
     var platform = new NotificationDetails(android:android,iOS:ios);
 
-    await _flutterLocalNotificationsPlugin.show(0, pincode, details, platform);
+    await _flutterLocalNotificationsPlugin.show(0, "Vaccine Available at ${pincode}", "Totat Vaccine availabe ${details} \n Book now ", platform);
   }
-  
-
+  Future<List<Centers>> checkavailabilty1(String p, String d) async {
+    // print("pincode "+p);
+    // print("date "+d);
+    GetStorage box = GetStorage();
+    var url = Uri.parse(
+        'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?pincode=${p}&date=${d}');
+    var response = await http.get(url);
+    // print("res ${response.body}");
+    if (response.statusCode == 200) {
+      var r = covidvaccinebypinFromJson(response.body);
+      List<Centers> s = r.centers;
+      box.write('state_name', '${s[0].stateName}');
+      box.write('district_name', '${s[0].districtName}');
+      Networking n=new Networking();
+      n.get_notified();
+      return s;
+    } else {
+      throw Exception('Unexpected error occured!');
+    }
+  }
+  Future<void> notify_alert()
+  async{
+    GetStorage box = GetStorage();
+    String p=box.read('pincode');
+    String d=box.read('date');
+    checkavailabilty1(p,d);
+    print("notify alert");
+    //get nearby by centers
+    var currentDistrictId = box.read('district_id');
+    print("cd id ${currentDistrictId}");
+    if (currentDistrictId != null) {
+      DateTime currentdate = DateTime.now();
+      for (var i = 0; i < 14; i++) {
+        DateTime date = currentdate.add(Duration(days: i));
+        String dateString = '${date.day}-${date.month}-${date.year}';
+        print("date ${dateString}");
+        final _url =
+        // 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=453&date=20-05-2021';
+            'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=$currentDistrictId&date=$dateString';
+        // print(_url);
+        var centerList = await http
+            .get(_url)
+            .then((value) => CenterList.fromJson(value.body));
+        bool isAvailable = false;
+        for (var e in centerList.centers) {
+          print('Center: ${e.name}');
+          var avail = e.sessions
+              .map((el) => el.availableCapacity>0)
+              .toList()
+              .toSet()
+              .toList();
+          if (avail.contains(true))
+           // get notification
+            {
+            List<SessionDetails> sessions = e.sessions
+                .map((e) => e.availableCapacity>0 ? e : null)
+                .toList()
+              ..removeWhere((el) => el == null);
+            for (var session in sessions)
+            {
+              print("notification ${session.minAgeLimit}");
+              var android = AndroidNotificationDetails("1687497218170948721x8", "New Trips Notification", "Notification Channel for vendor. All the new trips notifications will arrive here.",importance: Importance.max,priority: Priority.high,
+                  showWhen: false);
+              var ios = IOSNotificationDetails();
+              var platform = new NotificationDetails(android:android,iOS:ios);
+              await _flutterLocalNotificationsPlugin.show(0, "Vaccine Available at ${e.pincode} on ${session.date}", "Total Vaccine availabe ${session.availableCapacity} \n Book now ", platform);
+            }
+            }
+          if (avail.contains(true)) isAvailable = true;
+        }
+        if (isAvailable) break;
+      }
+      print('bg-fetch complete............................................');
+    }
+  }
 }
 
 
