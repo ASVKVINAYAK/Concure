@@ -52,7 +52,7 @@ class VaccinebyPin extends StatefulWidget {
 
 
 class _VaccinebyPinState extends State<VaccinebyPin> {
-  final box = GetStorage();
+  final box = GetStorage('MyStorage');
   Future<List<Centers>> checkavailabilty1(String p, String d) async {
     // print("pincode "+p);
     // print("date "+d);
@@ -66,6 +66,7 @@ class _VaccinebyPinState extends State<VaccinebyPin> {
       List<Centers> s = r.centers;
       box.write('state_name', '${s[0].stateName}');
       box.write('district_name', '${s[0].districtName}');
+      print("checking pincode ${box.read('pincode')}");
       Networking n=new Networking();
       n.get_notified();
       NotificationService nr= new NotificationService();

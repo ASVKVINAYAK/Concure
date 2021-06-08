@@ -11,7 +11,7 @@ import 'package:intl/intl.dart';
 
 
 class Networking {
-  final box = GetStorage();
+  final box = GetStorage('MyStorage');
 
   Future<Covid19Dashboard> getDashboardData() async {
     Covid19Dashboard _dashboardResult;

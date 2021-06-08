@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:covid19_tracker/model/config.dart';
 import 'package:covid19_tracker/model/constants.dart';
 import 'package:covid19_tracker/screens/SettingPage.dart';
+import 'package:covid19_tracker/screens/helpline_numbers_statewise.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -66,6 +67,18 @@ class _Indian extends State<Indian> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Concure'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(
+              Icons.call,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => HelpLine()));
+            },
+          )
+        ],
       ),
 
       body: data == null

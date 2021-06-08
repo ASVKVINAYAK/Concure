@@ -21,7 +21,9 @@ void callbackDispatcher()
     if(taskName=="vaccine_notify") {
       print("fetch");
       NotificationService nr = new NotificationService();
-      GetStorage box = GetStorage();
+      GetStorage box = GetStorage('MyStorage');
+      Networking n=new Networking();
+      n.get_notified();
       nr.show(box.read('pincode'), "demo bg  fetch");
       nr.notify_alert();
       // n.get_notified();
@@ -36,7 +38,7 @@ void callbackDispatcher()
 void main() async {
 
   await Hive.initFlutter();
-  await GetStorage.init();
+  await GetStorage.init('MyStorage');
   box = await Hive.openBox('easyTheme');
   WidgetsFlutterBinding.ensureInitialized();
   await Workmanager.initialize(callbackDispatcher);
@@ -245,7 +247,7 @@ class NotificationService extends ChangeNotifier{
   Future<List<Centers>> checkavailabilty1(String p, String d) async {
     // print("pincode "+p);
     // print("date "+d);
-    GetStorage box = GetStorage();
+    GetStorage box = GetStorage('MyStorage');
     var url = Uri.parse(
         'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?pincode=${p}&date=${d}');
     var response = await http.get(url);
@@ -264,13 +266,13 @@ class NotificationService extends ChangeNotifier{
   }
   Future<void> notify_alert()
   async{
+    GetStorage box = GetStorage('MyStorage');
     Networking n=new Networking();
     n.get_notified();
-    GetStorage box = GetStorage();
     String p=box.read('pincode');
     String d=box.read('date');
     print(" pin ${p}  dat ${d}");
-    checkavailabilty1(p,d);
+  //  checkavailabilty1(p,d);
     print("notify alert");
     //get nearby by centers
     var currentDistrictId = box.read('district_id');
