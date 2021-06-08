@@ -17,12 +17,17 @@ import 'package:workmanager/workmanager.dart';
 void callbackDispatcher()
 {
   Workmanager.executeTask((taskName, inputData) async {
-    NotificationService nr= new NotificationService();
-    GetStorage box = GetStorage();
-    nr.show(box.read('pincode'), "demo bg  fetch");
-    nr.notify_alert();
-    // n.get_notified();
-    //checkAvailability2();
+    print("bg");
+    if(taskName=="vaccine_notify") {
+      print("fetch");
+      NotificationService nr = new NotificationService();
+      GetStorage box = GetStorage();
+      nr.show(box.read('pincode'), "demo bg  fetch");
+      nr.notify_alert();
+      // n.get_notified();
+      //checkAvailability2();
+      return Future.value(true);
+    }
     return Future.value(true);
   });
 }
@@ -37,7 +42,7 @@ void main() async {
   await Workmanager.initialize(callbackDispatcher);
   await Workmanager.registerPeriodicTask("vaccine_notify", "vaccine_notify",
       inputData: {"data1": "value1", "data2": "value2"},
-      frequency: Duration(minutes: 15),
+      frequency: Duration(minutes: 1),
       initialDelay: Duration(minutes: 1));
   runApp(MyApp());
 }
@@ -259,9 +264,12 @@ class NotificationService extends ChangeNotifier{
   }
   Future<void> notify_alert()
   async{
+    Networking n=new Networking();
+    n.get_notified();
     GetStorage box = GetStorage();
     String p=box.read('pincode');
     String d=box.read('date');
+    print(" pin ${p}  dat ${d}");
     checkavailabilty1(p,d);
     print("notify alert");
     //get nearby by centers
