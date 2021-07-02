@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -64,8 +65,11 @@ class _VaccinebyPinState extends State<VaccinebyPin> {
     if (response.statusCode == 200) {
       var r = covidvaccinebypinFromJson(response.body);
       List<Centers> s = r.centers;
-      box.write('state_name', '${s[0].stateName}');
-      box.write('district_name', '${s[0].districtName}');
+      SharedPreferences pref = await SharedPreferences.getInstance();
+      await pref.setString('state_name', '${s[0].stateName}');
+      await pref.setString('district_name', '${s[0].districtName}');
+     await box.write('state_name', '${s[0].stateName}');
+      await box.write('district_name', '${s[0].districtName}');
       print("checking pincode ${box.read('pincode')}");
       Networking n=new Networking();
       n.get_notified();
@@ -204,8 +208,11 @@ class _VaccinebyPinState extends State<VaccinebyPin> {
                               t = pincode;
                               pincode = pin.text;
                               date = dateController.text;
-                              box.write('pincode', pincode.toString());
-                              box.write('date', date);
+                              SharedPreferences pref = await SharedPreferences.getInstance();
+                              await pref.setString('pincode', pincode.toString());
+                              await pref.setString('date', date);
+                             await box.write('pincode', pincode.toString());
+                              await box.write('date', date);
                               // print(click);
                               setState(() async {
                                 cn = await checkavailabilty1(pincode, date);
