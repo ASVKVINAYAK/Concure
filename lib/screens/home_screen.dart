@@ -114,7 +114,12 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
                   textColor: Colors.red,
                   iconActiveColor: Colors.red,
                   iconColor: Colors.red,
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomeScreen()),
+                    );
+                  },
                 ),
                 GButton(
                   icon: Icons.find_in_page,
@@ -265,9 +270,9 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
           ),
           child: TabBar(
             indicator: BubbleTabIndicator(
-              tabBarIndicatorSize: TabBarIndicatorSize.tab,
+              tabBarIndicatorSize: TabBarIndicatorSize.values.first,
               indicatorHeight: 35.0,
-              indicatorColor: Colors.white,
+              indicatorColor: Colors.lightBlueAccent,
             ),
             labelStyle: Styles.tabTextStyle,
             labelColor: Colors.black,

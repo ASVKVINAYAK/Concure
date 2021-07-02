@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:covid19_tracker/model/constants.dart';
 import 'package:covid19_tracker/model/config.dart';
 import 'package:covid19_tracker/screens/demo.dart';
+import 'package:covid19_tracker/screens/home_screen.dart';
 import 'package:covid19_tracker/screens/slot.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -251,7 +252,7 @@ class _SettingPage extends State<SettingPage> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => DashboardScreen(),
+                        builder: (context) => HomeScreen(),
                       ),
                     );
                   },
